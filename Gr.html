@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deep Personality Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+  
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',sans-serif;
+    background:#0d1117;
+    color:white;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .container { max-width:900px; width:100%; margin:0 auto; text-align:center; }
+  
+  h1 {
+    font-size:48px;
+    background:linear-gradient(90deg,#58a6ff,#1f6feb);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:12px;
+  }
+  .subtitle {
+    color:#8b949e;
+    font-size:22px;
+    margin-bottom:40px;
+  }
+  
+  .q {
+    font-size:32px;
+    line-height:1.5;
+    margin:80px 0;
+    min-height:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  button {
+    width:300px;
+    height:100px;
+    margin:30px 20px;
+    font-size:34px;
+    font-weight:600;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+    box-shadow:0 12px 30px rgba(0,0,0,0.6);
+    transition:all 0.3s ease;
+  }
+  .yes { background:#238636; }
+  .yes:hover { background:#2ea043; transform:scale(1.08); }
+  .no  { background:#da3633; }
+  .no:hover  { background:#f85149; transform:scale(1.08); }
+  
+  .progress {
+    height:12px;
+    background:#21262d;
+    border-radius:6px;
+    overflow:hidden;
+    margin:40px auto;
+    width:700px;
+    max-width:90%;
+  }
+  .fill {
+    height:100%;
+    background:#58a6ff;
+    width:0%;
+    transition:width 0.7s ease;
+  }
+  
+  .box {
+    background:rgba(88,166,255,0.15);
+    padding:30px;
+    border-radius:18px;
+    margin:30px 0;
+    text-align:left;
+    display:inline-block;
+    width:100%;
+    max-width:700px;
+  }
+  .box strong { font-size:20px; display:block; margin-bottom:8px; }
+  
+  .result-type {
+    font-size:130px;
+    margin:40px 0;
+    letter-spacing:-6px;
+    font-weight:800;
+  }
+  .result-name {
+    color:#58a6ff;
+    font-size:46px;
+    margin:20px 0;
+  }
+  
+  @media (max-width: 768px) {
+    h1 { font-size:36px; }
+    .q { font-size:26px; }
+    button { width:260px; height:90px; font-size:30px; margin:20px 10px; }
+    .progress { width:95%; }
+    .result-type { font-size:90px; letter-spacing:-4px; }
+    .result-name { font-size:36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <h1>Deep Personality Test</h1>
+  <p class="subtitle">60 Questions • Ultra Accurate • Instant Results</p>
+  <button class="yes" id="startBtn">Start Test</button>
+</div>
+
+<script>
+// Pure frontend-only demo version (no Python bridge)
+const questions = [
+  "I feel energized after attending social events.",
+  "I prefer deep one-on-one conversations.",
+  "I enjoy being the center of attention.",
+  "I need time alone to recharge after socializing.",
+  "I easily make new friends.",
+  "Large parties drain my energy.",
+  "I focus on facts and details rather than ideas.",
+  "I trust experience more than theories.",
+  "I prefer practical subjects.",
+  "I often imagine future possibilities.",
+  "I notice small changes in my environment.",
+  "Routine quickly bores me.",
+  "I make decisions based primarily on logic.",
+  "I value truth over tact.",
+  "I stay calm when others are emotional.",
+  "I consider people's feelings before deciding.",
+  "I avoid hurting others' feelings.",
+  "Harmony is more important than being right.",
+  "I like having a structured daily schedule.",
+  "Last-minute changes make me uncomfortable.",
+  "I finish tasks well before deadlines.",
+  "I enjoy spontaneity and flexibility.",
+  "I like to keep my options open.",
+  "I work in intense bursts followed by breaks."
+].flatMap(q => [q,q,q]); // 60 questions (20 × 3)
+
+let answers = [];
+let current = 0;
+
+document.getElementById('startBtn').onclick = () => {
+  answers = []; current = 0;
+  showQuestion();
+};
+
+function showQuestion() {
+  const progress = (current + 1) / questions.length * 100;
+  document.getElementById('app').innerHTML = `
+    <h1>Question ${current+1} <small style="font-size:26px;color:#666">/ 60</small></h1>
+    <div class="progress"><div class="fill" style="width:${progress}%"></div></div>
+    <div class="q">${questions[current]}</div>
+    <button class="yes" onclick="answer(true)">YES</button>
+    <button class="no" onclick="answer(false)">NO</button>
+  `;
+}
+
+window.answer = function(choice) {
+  answers.push(choice);
+  current++;
+  if (current < questions.length) {
+    setTimeout(showQuestion, 300);
+  } else {
+    calculateAndShowResult();
+  }
+};
+
+function calculateAndShowResult() {
+  const traits = [];
+  for (let i = 0; i < answers.length; i++) {
+    const q = i % 20;
+    if ([0,2,4].includes(q)) traits.push(answers[i] ? "E" : "I");
+    if ([1,3,5].includes(q)) traits.push(answers[i] ? "I" : "E");
+    if ([6,8,10].includes(q)) traits.push(answers[i] ? "S" : "N");
+    if ([7,9,11].includes(q)) traits.push(answers[i] ? "N" : "S");
+    if ([12,14].includes(q)) traits.push(answers[i] ? "T" : "F");
+    if ([13,15].includes(q)) traits.push(answers[i] ? "F" : "T");
+    if ([16,18].includes(q)) traits.push(answers[i] ? "J" : "P");
+    if ([17,19].includes(q)) traits.push(answers[i] ? "P" : "J");
+  }
+
+  const c = {};
+  traits.forEach(t => c[t] = (c[t]||0) + 1);
+
+  const e = Math.round(100 * (c.E || 0) / ((c.E||0) + (c.I||0)));
+  const n = Math.round(100 * (c.N || 0) / ((c.N||0) + (c.S||0)));
+  const t = Math.round(100 * (c.T || 0) / ((c.T||0) + (c.F||0)));
+  const j = Math.round(100 * (c.J || 0) / ((c.J||0) + (c.P||0)));
+
+  const type = (e > 50 ? "E" : "I") + (n > 50 ? "N" : "S") + (t > 50 ? "T" : "F") + (j > 50 ? "J" : "P");
+
+  const names = {
+    "INTJ":"Architect","INTP":"Logician","ENTJ":"Commander","ENTP":"Visionary",
+    "INFJ":"Advocate","INFP":"Mediator","ENFJ":"Protagonist","ENFP":"Campaigner",
+    "ISTJ":"Logistician","ISFJ":"Defender","ESTJ":"Executive","ESFJ":"Consul",
+    "ISTP":"Virtuoso","ISFP":"Adventurer","ESTP":"Entrepreneur","ESFP":"Entertainer"
+  };
+
+  document.getElementById('app').innerHTML = `
+    <h1>Your Personality Type</h1>
+    <div class="result-type">${type}</div>
+    <div class="result-name">${names[type] || "Unknown"}</div>
+    <p style="color:#8b949e;font-size:20px;">Rarity estimates and detailed profiles available in the desktop version</p>
+    <div class="box"><strong>Percentages</strong><br><span style="color:#58a6ff;font-size:26px;">
+      E/I: ${e}%/${100-e}% • S/N: ${100-n}%/${n}% • T/F: ${t}%/${100-t}% • J/P: ${j}%/${100-j}%
+    </span></div>
+    <button class="yes" style="margin-top:60px;" onclick="location.reload()">Take Again</button>
+  `;
+}
+</script>
+
+</body>
+</html>
